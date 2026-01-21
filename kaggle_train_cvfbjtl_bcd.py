@@ -52,7 +52,7 @@ from enhanced_cvfbjtl_bcd_model import (
     StackedAutoencoder, HHOAOptimizer, DataBalancer
 )
 from breakhis_dataloader import BreaKHisDataLoader
-from advanced_explainability import GradCAM
+from advanced_explainability import GradCAMPlusPlus as GradCAM
 
 # ============================================================================
 # GPU Configuration for Kaggle
