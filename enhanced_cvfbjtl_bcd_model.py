@@ -75,10 +75,24 @@ class GaborFilter:
         Returns:
             Filtered image with enhanced texture features
         """
+        # Ensure image is in correct format (uint8, 0-255)
+        if image.dtype == np.float32 or image.dtype == np.float64:
+            # Convert from [0,1] to [0,255] if needed
+            if image.max() <= 1.0:
+                image = (image * 255).astype(np.uint8)
+            else:
+                image = image.astype(np.uint8)
+        elif image.dtype != np.uint8:
+            image = image.astype(np.uint8)
+            
         if len(image.shape) == 3:
             gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         else:
             gray = image.copy()
+            
+        # Ensure gray is uint8
+        if gray.dtype != np.uint8:
+            gray = gray.astype(np.uint8)
             
         # Multi-directional filtering (8 orientations)
         orientations = [0, np.pi/4, np.pi/2, 3*np.pi/4, 
