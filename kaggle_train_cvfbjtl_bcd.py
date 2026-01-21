@@ -1,22 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Kaggle Training Script for Enhanced CVFBJTL-BCD Model
-======================================================
-Optimized for Kaggle's GPU environment (Tesla P100 / T4)
-
-This script:
-1. Automatically detects Kaggle environment
-2. Uses Kaggle datasets (upload your BreaKHis dataset to Kaggle)
-3. Optimizes for GPU training
-4. Saves outputs to Kaggle output directory
-5. Achieves better performance than baseline paper (>98.18% accuracy)
-
-Author: Research Team
-Date: January 2026
-Target: Scientific Reports / IEEE J-BHI Publication
-"""
-
 import os
 import sys
 import warnings
