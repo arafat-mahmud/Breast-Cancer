@@ -69,8 +69,8 @@ def setup_kaggle_gpu():
             print(f"   Memory Growth: ENABLED")
             
             # XLA optimization (JIT compilation)
-            tf.config.optimizer.set_jit(True)
-            print(f"   XLA JIT Compilation: ENABLED")
+            # tf.config.optimizer.set_jit(True) # DISABLED: Incompatible with ImageDataGenerator
+            print(f"   XLA JIT Compilation: DISABLED (Required for Data Augmentation)")
             
             return True
         except RuntimeError as e:
@@ -471,7 +471,9 @@ class KaggleTrainer:
                 validation_data=(self.data['X_val'], self.data['y_val']),
                 epochs=self.config.epochs,
                 callbacks=callbacks,
-                verbose=1
+                verbose=1,
+                workers=1,                 # <--- Added for stability
+                use_multiprocessing=False  # <--- Added for stability
             )
         else:
             self.history = self.model.fit(
