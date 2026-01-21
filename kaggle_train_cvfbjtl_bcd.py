@@ -284,9 +284,9 @@ class KaggleTrainer:
         if self.config.use_gabor:
             print(f"\n🔬 Applying Gabor filtering...")
             gabor = GaborFilter()
-            X_train = np.array([gabor.apply_filters(img) for img in X_train])
-            X_val = np.array([gabor.apply_filters(img) for img in X_val])
-            X_test = np.array([gabor.apply_filters(img) for img in X_test])
+            X_train = np.array([gabor.apply_multiscale_filter(img) for img in X_train])
+            X_val = np.array([gabor.apply_multiscale_filter(img) for img in X_val])
+            X_test = np.array([gabor.apply_multiscale_filter(img) for img in X_test])
             print(f"   ✅ Gabor filtering applied")
         
         # Class distribution
