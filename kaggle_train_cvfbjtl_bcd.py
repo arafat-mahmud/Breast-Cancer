@@ -471,9 +471,7 @@ class KaggleTrainer:
                 validation_data=(self.data['X_val'], self.data['y_val']),
                 epochs=self.config.epochs,
                 callbacks=callbacks,
-                verbose=1,
-                workers=1,                 # <--- Added for stability
-                use_multiprocessing=False  # <--- Added for stability
+                verbose=1
             )
         else:
             self.history = self.model.fit(
