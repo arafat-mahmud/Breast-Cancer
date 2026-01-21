@@ -331,6 +331,13 @@ class KaggleTrainer:
         }
         
         # Clean up
+        local_vars = locals()
+
+        cleanup_targets = ['X', 'y', 'metadata', 'X_temp', 'y_temp']
+        for var_name in cleanup_targets:
+             if var_name in local_vars:
+                  del local_vars[var_name]
+        import gc
         gc.collect()
         
         print("✅ Data preparation complete!\n")
