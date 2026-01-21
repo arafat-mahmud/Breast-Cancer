@@ -129,7 +129,8 @@ class GaborFilter:
                           nms_result: np.ndarray) -> np.ndarray:
         """Fuse multi-scale filtered images"""
         fused = np.mean(filtered_imgs, axis=0)
-        fused = cv2.normalize(fused, None, 0, 255, cv2.CV_8U)
+        fused = cv2.normalize(fused, None, 0, 255, cv2.NORM_MINMAX)
+        fused = fused.astype(np.uint8)
         return fused
 
 
