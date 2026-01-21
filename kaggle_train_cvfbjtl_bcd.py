@@ -331,7 +331,6 @@ class KaggleTrainer:
         }
         
         # Clean up
-        del X, y, metadata, X_temp, y_temp
         gc.collect()
         
         print("✅ Data preparation complete!\n")
