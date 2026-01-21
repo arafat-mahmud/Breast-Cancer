@@ -254,33 +254,40 @@ class KaggleTrainer:
             image_size=(self.config.image_size, self.config.image_size)
         )
         
-        # Load dataset
-        X, y, metadata = loader.load_dataset(
+        # Load dataset (returns dict with train/val/test splits)
+        dataset = loader.load_dataset(
             magnification=self.config.magnification,
-            binary=self.config.binary,
-            use_gabor=self.config.use_gabor
+            binary=self.config.binary
         )
+        
+        # Load actual images from paths
+        print("\n📂 Loading images from disk...")
+        X_train = loader.load_images_from_paths(dataset['train']['paths'])
+        X_val = loader.load_images_from_paths(dataset['val']['paths'])
+        X_test = loader.load_images_from_paths(dataset['test']['paths'])
+        
+        y_train = dataset['train']['labels']
+        y_val = dataset['val']['labels']
+        y_test = dataset['test']['labels']
         
         print(f"✅ Dataset loaded:")
-        print(f"   Total images: {len(X)}")
-        print(f"   Image shape: {X[0].shape}")
-        print(f"   Classes: {np.unique(y)}")
-        
-        # Split dataset
-        from sklearn.model_selection import train_test_split
-        
-        X_train, X_temp, y_train, y_temp = train_test_split(
-            X, y, test_size=0.3, random_state=self.config.seed, stratify=y
-        )
-        
-        X_val, X_test, y_val, y_test = train_test_split(
-            X_temp, y_temp, test_size=0.33, random_state=self.config.seed, stratify=y_temp
-        )
+        print(f"   Total images: {len(X_train) + len(X_val) + len(X_test)}")
+        print(f"   Image shape: {X_train[0].shape}")
+        print(f"   Classes: {np.unique(y_train)}")
         
         print(f"\n📊 Data Split:")
         print(f"   Training: {len(X_train)} samples")
         print(f"   Validation: {len(X_val)} samples")
         print(f"   Testing: {len(X_test)} samples")
+        
+        # Apply Gabor filtering if enabled
+        if self.config.use_gabor:
+            print(f"\n🔬 Applying Gabor filtering...")
+            gabor = GaborFilter()
+            X_train = np.array([gabor.apply_filters(img) for img in X_train])
+            X_val = np.array([gabor.apply_filters(img) for img in X_val])
+            X_test = np.array([gabor.apply_filters(img) for img in X_test])
+            print(f"   ✅ Gabor filtering applied")
         
         # Class distribution
         from collections import Counter

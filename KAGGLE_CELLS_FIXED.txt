@@ -1,31 +1,19 @@
 """
-READY-TO-USE KAGGLE NOTEBOOK
-============================
+READY-TO-USE KAGGLE NOTEBOOK - CORRECTED VERSION
+=================================================
 Copy ALL cells below into your Kaggle notebook in order.
 
 Total: 8 cells
 Time: ~3 hours with GPU
+
+FIXES APPLIED:
+- ✅ Compatible package versions (imbalanced-learn + scikit-learn)
+- ✅ GradCAM import fixed
+- ✅ Proper cell separation
 """
 
 # ============================================================================
-# CELL 1: Environment Check
-# ============================================================================
-"""markdown
-# 🏥 Enhanced CVFBJTL-BCD: Breast Cancer Diagnosis
-
-**Target:** >98.18% accuracy (paper baseline)
-
-**Setup:**
-1. ✅ Enable GPU (Settings → Accelerator → GPU T4 x2)
-2. ✅ Add BreaKHis dataset
-3. ✅ Upload 4 Python files
-4. ✅ Run all cells
-
-**Time:** ~2-4 hours with GPU
-"""
-
-# ============================================================================
-# CELL 2: Check Python & GPU
+# CELL 1: Check Python & GPU
 # ============================================================================
 import sys
 import os
@@ -43,13 +31,21 @@ else:
     print("⚠️  NO GPU! Enable: Settings → Accelerator → GPU")
 
 # ============================================================================
-# CELL 3: Install Packages
+# CELL 2: Install Compatible Packages (FIXED)
 # ============================================================================
-!pip install -q imbalanced-learn==0.11.0 albumentations==1.3.1
+# Install compatible versions that work together
+!pip install -q --upgrade imbalanced-learn albumentations
+
 print("✅ Packages installed")
 
+# Verify versions
+import imblearn
+import sklearn
+print(f"   imbalanced-learn: {imblearn.__version__}")
+print(f"   scikit-learn: {sklearn.__version__}")
+
 # ============================================================================
-# CELL 4: List Input Datasets
+# CELL 3: List Available Datasets
 # ============================================================================
 print("📂 Available Datasets:")
 if os.path.exists('/kaggle/input'):
@@ -59,26 +55,21 @@ else:
     print("   (Not on Kaggle)")
 
 # ============================================================================
-# CELL 5: Upload Python Files Setup
+# CELL 4: Download Python Files from GitHub (LATEST VERSION)
 # ============================================================================
-"""markdown
-## 📤 Upload Required Files
+# Download all required files - LATEST FIXES APPLIED
+!wget -q --no-cache https://raw.githubusercontent.com/arafat-mahmud/Breast-Cancer/main/enhanced_cvfbjtl_bcd_model.py?$(date +%s)
+!wget -q --no-cache https://raw.githubusercontent.com/arafat-mahmud/Breast-Cancer/main/breakhis_dataloader.py?$(date +%s)
+!wget -q --no-cache https://raw.githubusercontent.com/arafat-mahmud/Breast-Cancer/main/advanced_explainability.py?$(date +%s)
+!wget -q --no-cache https://raw.githubusercontent.com/arafat-mahmud/Breast-Cancer/main/kaggle_train_cvfbjtl_bcd.py?$(date +%s)
 
-**You need to upload 4 Python files:**
-1. enhanced_cvfbjtl_bcd_model.py
-2. breakhis_dataloader.py
-3. advanced_explainability.py
-4. kaggle_train_cvfbjtl_bcd.py
+# Remove cache buster from filenames
+!for f in *.py\?*; do mv "$f" "${f%%\?*}"; done 2>/dev/null || true
 
-**How to upload:**
-- Click "File" → "Add Utility Script" → Upload each .py file
-- Files will be placed in /kaggle/working/
-
-**Then run the cell below to verify.**
-"""
+print("✅ Files downloaded from GitHub (latest version)")
 
 # ============================================================================
-# CELL 6: Verify Everything (AUTO-SETUP)
+# CELL 5: Auto-Setup & Verification
 # ============================================================================
 import os
 import shutil
@@ -128,8 +119,7 @@ required_files = [
     'enhanced_cvfbjtl_bcd_model.py',
     'breakhis_dataloader.py',
     'advanced_explainability.py',
-    'kaggle_train_cvfbjtl_bcd.py',
-    'kaggle_setup_helper.py'  # Optional
+    'kaggle_train_cvfbjtl_bcd.py'
 ]
 
 # Check in /kaggle/working
@@ -138,24 +128,13 @@ files_present = []
 
 for file in required_files:
     if os.path.exists(file):
-        print(f"   ✅ {file}")
+        size = os.path.getsize(file)
+        print(f"   ✅ {file} ({size:,} bytes)")
         files_present.append(file)
     else:
-        # Try to find in input (if uploaded as dataset)
-        for root, dirs, files_list in os.walk('/kaggle/input'):
-            if file in files_list:
-                src = os.path.join(root, file)
-                shutil.copy2(src, f'/kaggle/working/{file}')
-                print(f"   ✅ {file} (copied from input)")
-                files_present.append(file)
-                break
-        else:
-            if 'setup_helper' not in file:  # Optional file
-                print(f"   ❌ {file} - MISSING!")
+        print(f"   ❌ {file} - MISSING!")
 
-all_required = ['enhanced_cvfbjtl_bcd_model.py', 'breakhis_dataloader.py', 
-                'advanced_explainability.py', 'kaggle_train_cvfbjtl_bcd.py']
-all_present = all(f in files_present for f in all_required)
+all_present = all(f in files_present for f in required_files)
 
 # -----------------------------------------------
 # 3. Save Configuration
@@ -185,60 +164,28 @@ else:
 print("="*60)
 
 # ============================================================================
-# CELL 7: Run Training
-# ============================================================================
-"""markdown
-## 🚀 Training
-
-**This will:**
-1. Load BreaKHis dataset (200X magnification)
-2. Apply Gabor filtering
-3. Build Enhanced CVFBJTL-BCD model
-4. Train for 50 epochs (~2-4 hours)
-5. Generate evaluation plots
-6. Save results to /kaggle/working/outputs/
-
-**You can monitor progress below.**
-"""
-
-# ============================================================================
-# CELL 8: Execute Training Script
+# CELL 6: Run Training (Separate Cell)
 # ============================================================================
 import sys
 sys.path.insert(0, '/kaggle/working')
 
 # Run the complete training pipeline
+print("🚀 Starting training...")
+print("⏱️  Expected time: 2-4 hours with GPU\n")
+
 %run kaggle_train_cvfbjtl_bcd.py
 
-print("\n✅ Training complete!")
-print("📁 Check /kaggle/working/outputs/ for results")
+print("\n" + "="*60)
+print("✅ TRAINING COMPLETE!")
+print("="*60)
 
 # ============================================================================
-# CELL 9 (Optional): Download Results as ZIP
+# CELL 7: Create Results ZIP
 # ============================================================================
-"""markdown
-## 📥 Download Results
-
-Results are saved in `/kaggle/working/outputs/`
-
-**Option 1:** Download individual files (click folder icon)
-**Option 2:** Create ZIP (run cell below)
-"""
-
-# ============================================================================
-# CELL 9 (Optional): Download Results as ZIP
-# ============================================================================
-"""markdown
-## 📥 Download Results
-
-Results are saved in `/kaggle/working/outputs/`
-
-**Option 1:** Download individual files (click folder icon)
-**Option 2:** Create ZIP (run cell below)
-"""
-
 import shutil
 import os
+
+print("\n📦 Creating results package...")
 
 if os.path.exists('/kaggle/working/outputs'):
     # Create ZIP
@@ -249,10 +196,15 @@ if os.path.exists('/kaggle/working/outputs'):
     )
     
     print("✅ Created: training_results.zip")
-    print("\nContents:")
-    for file in os.listdir('/kaggle/working/outputs'):
+    print("\n📊 Contents:")
+    
+    total_size = 0
+    for file in sorted(os.listdir('/kaggle/working/outputs')):
         size = os.path.getsize(f'/kaggle/working/outputs/{file}')
-        print(f"   - {file} ({size/1024/1024:.1f} MB)")
+        total_size += size
+        print(f"   - {file:<40} {size/1024/1024:>7.1f} MB")
+    
+    print(f"\n📁 Total size: {total_size/1024/1024:.1f} MB")
     
     print("\n📥 To download:")
     print("   1. Click folder icon (left sidebar)")
@@ -260,3 +212,42 @@ if os.path.exists('/kaggle/working/outputs'):
     print("   3. Click ... → Download")
 else:
     print("❌ No outputs found. Training may not have completed.")
+
+# ============================================================================
+# CELL 8: Display Final Results (Optional)
+# ============================================================================
+import json
+import os
+
+if os.path.exists('/kaggle/working/outputs/test_results.json'):
+    with open('/kaggle/working/outputs/test_results.json', 'r') as f:
+        results = json.load(f)
+    
+    print("\n" + "="*60)
+    print("🎯 FINAL RESULTS")
+    print("="*60)
+    
+    print(f"\n📊 Model Performance:")
+    print(f"   Test Accuracy:  {results.get('test_accuracy', 0)*100:.2f}%")
+    print(f"   Precision:      {results.get('precision', 0)*100:.2f}%")
+    print(f"   Recall:         {results.get('recall', 0)*100:.2f}%")
+    print(f"   F1-Score:       {results.get('f1_score', 0)*100:.2f}%")
+    print(f"   ROC-AUC:        {results.get('roc_auc', 0):.4f}")
+    
+    print(f"\n📈 Comparison with Paper:")
+    paper_acc = 98.18
+    your_acc = results.get('test_accuracy', 0) * 100
+    improvement = your_acc - paper_acc
+    
+    print(f"   Paper baseline:  {paper_acc:.2f}%")
+    print(f"   Your model:      {your_acc:.2f}%")
+    print(f"   Improvement:     {improvement:+.2f}%")
+    
+    if your_acc > paper_acc:
+        print("\n   ✅ EXCEEDED PAPER BASELINE! 🎉")
+    else:
+        print(f"\n   ⚠️  Close to baseline (target: >{paper_acc}%)")
+    
+    print("="*60)
+else:
+    print("❌ Results file not found. Check if training completed.")
