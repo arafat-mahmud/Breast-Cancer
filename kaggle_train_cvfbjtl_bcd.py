@@ -28,6 +28,9 @@ import json
 import gc
 
 # Import custom modules
+import importlib
+import enhanced_cvfbjtl_bcd_model
+importlib.reload(enhanced_cvfbjtl_bcd_model)
 from enhanced_cvfbjtl_bcd_model import (
     CVFBJTLBCDModel, GaborFilter, EnhancedFeatureFusion, 
     StackedAutoencoder, HHOAOptimizer, DataBalancer

@@ -104,7 +104,7 @@ class GaborFilter:
                                        self.sigma, theta, 
                                        self.lambd, self.gamma, 
                                        0, ktype=cv2.CV_32F)
-            filtered = cv2.filter2D(gray, cv2.CV_8UC3, kernel)
+            filtered = cv2.filter2D(gray, cv2.CV_8U, kernel)
             filtered_images.append(filtered)
         
         # Edge detection
