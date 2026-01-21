@@ -287,10 +287,17 @@ class KaggleTrainer:
         if self.config.use_gabor:
             print(f"\n🔬 Applying Gabor filtering...")
             gabor = GaborFilter()
-            X_train = np.array([gabor.apply_multiscale_filter(img) for img in X_train])
-            X_val = np.array([gabor.apply_multiscale_filter(img) for img in X_val])
-            X_test = np.array([gabor.apply_multiscale_filter(img) for img in X_test])
-            print(f"   ✅ Gabor filtering applied")
+            import cv2  # Ensure cv2 is available here
+
+            # Helper to apply Gabor AND convert back to RGB (3 channels)
+            def process_gabor(img):
+                filtered = gabor.apply_multiscale_filter(img)
+                return cv2.cvtColor(filtered, cv2.COLOR_GRAY2RGB)
+
+            X_train = np.array([process_gabor(img) for img in X_train])
+            X_val = np.array([process_gabor(img) for img in X_val])
+            X_test = np.array([process_gabor(img) for img in X_test])
+            print(f"   ✅ Gabor filtering applied. New shape: {X_train.shape}")
         
         # Class distribution
         from collections import Counter
