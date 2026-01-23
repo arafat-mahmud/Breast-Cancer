@@ -154,7 +154,7 @@ class KaggleTrainingConfig:
         )
 
         # Advanced settings
-        self.use_augmentation = True
+        self.use_augmentation = False  # Disabled for Kaggle compatibility
         self.use_early_stopping = True
         self.patience = 10
 
