@@ -135,7 +135,7 @@ class KaggleTrainingConfig:
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Image settings  
-        self.image_size = 299  # Higher resolution (299x299) for detailed histopathological analysis
+        self.image_size = 224  # Optimized for GPU memory and training speed (224x224)
         self.magnification = "200X"  # Best performance in paper
         self.binary = True  # Benign vs Malignant
 
@@ -146,11 +146,11 @@ class KaggleTrainingConfig:
         self.use_sae = True  # Stacked Autoencoder (paper's method)
         self.use_hhoa = True  # HHOA optimization (paper's method) - Essential for 98%+ accuracy
 
-        # Training hyperparameters (exact paper specifications for 98%+ accuracy)
+        # Training hyperparameters (optimized for speed and convergence)
         self.epochs = 100  # Paper's full training epochs
-        self.batch_size = 5  # Paper's exact batch size for optimal gradient updates
+        self.batch_size = 8  # Optimal balance: better than 5 (too slow) and 16 (too large)
         self.learning_rate = (
-            0.01  # Paper's exact learning rate (100x higher for faster convergence)
+            0.001  # Reduced for stable convergence with complex SAE architecture
         )
 
         # Advanced settings
