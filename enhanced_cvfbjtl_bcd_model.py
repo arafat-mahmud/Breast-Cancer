@@ -390,6 +390,10 @@ class StackedAutoencoder:
         
         return encoder_model, autoencoder_model
 
+    def build_autoencoder(self):
+        """Backward-compatible alias expected by training pipeline."""
+        return self.build_sae_model()
+
 
 class HHOAOptimizer:
     """
