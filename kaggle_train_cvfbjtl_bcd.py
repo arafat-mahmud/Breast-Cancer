@@ -346,25 +346,13 @@ class KaggleTrainer:
                 )
 
         # Apply Stacked Autoencoder (SAE) feature learning if enabled
+        # NOTE: SAE is now integrated directly into the fusion model architecture
+        # No separate pre-training needed - it will train end-to-end with the main model
         if self.config.use_sae:
             print(f"\n🧠 Applying Stacked Autoencoder feature learning...")
-            from enhanced_cvfbjtl_bcd_model import StackedAutoencoder
-            
-            # Flatten images for SAE input
-            X_train_flat = X_train.reshape(X_train.shape[0], -1)
-            X_val_flat = X_val.reshape(X_val.shape[0], -1)
-            X_test_flat = X_test.reshape(X_test.shape[0], -1)
-            
-            # Initialize SAE with paper's architecture
-            sae = StackedAutoencoder(
-                input_dim=X_train_flat.shape[1],
-                encoding_dims=[2048, 1024, 512]  # Paper's encoding dimensions
-            )
-            
-            # Train SAE for feature learning
-            encoder_model, _ = sae.build_autoencoder()
-            
-            print(f"   ✅ SAE feature learning completed")
+            print(f"   ✅ SAE integrated into model architecture (will train end-to-end)")
+            # SAE layers are now part of the fusion model (see enhanced_cvfbjtl_bcd_model.py)
+            # This avoids GPU memory issues and follows the paper's end-to-end training approach
 
         # Check for NaN/Inf in data (critical for preventing NaN loss)
         print(f"\n🔍 Data quality checks...")
