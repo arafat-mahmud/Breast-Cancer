@@ -135,7 +135,7 @@ class KaggleTrainingConfig:
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Image settings  
-        self.image_size = 224  # Optimized for GPU memory and training speed (224x224)
+        self.image_size = 299  # Paper's standard size for histopathology (299x299) - critical for 98% accuracy
         self.magnification = "200X"  # Best performance in paper
         self.binary = True  # Benign vs Malignant
 
@@ -146,22 +146,25 @@ class KaggleTrainingConfig:
         self.use_sae = True  # Stacked Autoencoder (paper's method)
         self.use_hhoa = True  # HHOA optimization (paper's method) - Essential for 98%+ accuracy
 
-        # Training hyperparameters (optimized for speed and convergence)
+        # Training hyperparameters (optimized for paper's 98% accuracy)
         self.epochs = 100  # Paper's full training epochs
-        self.batch_size = 8  # Optimal balance: better than 5 (too slow) and 16 (too large)
+        self.batch_size = 16  # Optimal for 299x299 images
         self.learning_rate = (
-            0.001  # Reduced for stable convergence with complex SAE architecture
+            0.0001  # Lower for stable convergence with 299x299 images and complex architecture
         )
 
         # Advanced settings
         self.use_augmentation = False  # Disabled for Kaggle compatibility
         self.use_early_stopping = True
-        self.patience = 40  # Paper's patience - prevents premature stopping
+        self.patience = 60  # Increased to allow full convergence (60% of total epochs)
 
         # Callbacks
         self.use_reduce_lr = True
-        self.reduce_lr_patience = 15  # Paper's patience for LR reduction
+        self.reduce_lr_patience = 25  # Increased to prevent aggressive LR reduction
         self.reduce_lr_factor = 0.5  # Paper's LR reduction factor
+        
+        # Class balancing
+        self.use_class_weights = True  # Enable class weights for imbalanced data
 
         # Reproducibility
         self.seed = 42
@@ -496,22 +499,22 @@ class KaggleTrainer:
         # Early stopping
         if self.config.use_early_stopping:
             early_stop = keras.callbacks.EarlyStopping(
-                monitor="val_loss",
+                monitor="val_accuracy",  # ✅ CRITICAL FIX: Monitor accuracy, not loss
                 patience=self.config.patience,
                 restore_best_weights=True,
                 verbose=1,
-                mode="min",  # Monitor for minimum loss
+                mode="max",  # ✅ CRITICAL FIX: Maximize accuracy, not minimize loss
             )
             callbacks.append(early_stop)
 
         # Reduce learning rate on plateau
         if self.config.use_reduce_lr:
             reduce_lr = keras.callbacks.ReduceLROnPlateau(
-                monitor="val_loss",
+                monitor="val_accuracy",  # ✅ CRITICAL FIX: Monitor accuracy for consistency
                 factor=self.config.reduce_lr_factor,
                 patience=self.config.reduce_lr_patience,
                 min_lr=1e-7,
-                mode="min",  # Monitor for minimum loss
+                mode="max",  # ✅ CRITICAL FIX: Maximize accuracy
                 verbose=1,
             )
             callbacks.append(reduce_lr)
@@ -554,6 +557,26 @@ class KaggleTrainer:
 
         callbacks = self.setup_callbacks()
 
+        # Compute class weights for imbalanced data (CRITICAL FIX)
+        class_weight_dict = None
+        if self.config.use_class_weights:
+            from sklearn.utils.class_weight import compute_class_weight
+            
+            # Get class labels from one-hot encoded y_train
+            y_train_labels = np.argmax(self.data["y_train"], axis=1)
+            
+            class_weights = compute_class_weight(
+                'balanced',
+                classes=np.unique(y_train_labels),
+                y=y_train_labels
+            )
+            
+            class_weight_dict = {i: class_weights[i] for i in range(len(class_weights))}
+            
+            print(f"⚖️  Class weights computed for balanced training:")
+            for cls, weight in class_weight_dict.items():
+                print(f"   Class {cls}: weight={weight:.3f}")
+
         # Data augmentation
         if self.config.use_augmentation:
             from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -579,6 +602,7 @@ class KaggleTrainer:
                 validation_data=(self.data["X_val"], self.data["y_val"]),
                 epochs=self.config.epochs,
                 callbacks=callbacks,
+                class_weight=class_weight_dict,  # ✅ CRITICAL FIX: Add class weights
                 verbose=1,
             )
         else:
@@ -589,6 +613,7 @@ class KaggleTrainer:
                 batch_size=self.config.batch_size,
                 epochs=self.config.epochs,
                 callbacks=callbacks,
+                class_weight=class_weight_dict,  # ✅ CRITICAL FIX: Add class weights
                 verbose=1,
             )
 
