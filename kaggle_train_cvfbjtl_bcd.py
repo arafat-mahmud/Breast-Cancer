@@ -409,7 +409,6 @@ class KaggleTrainer:
         optimizer = keras.optimizers.Adam(
             learning_rate=self.config.learning_rate,
             clipnorm=1.0,  # Clip gradients to prevent explosion
-            clipvalue=0.5,  # Additional safety
         )
 
         self.model.compile(
